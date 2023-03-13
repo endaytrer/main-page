@@ -1,0 +1,91 @@
+.blog-section {
+    background-color: var(--light);
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--light);
+    color: var(--dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.list-head {
+    display: inline-block;
+    position: relative;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 60px;
+    padding-bottom: 16px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+}
+.list-head::after {
+    position: absolute;
+    left: 0;
+    top: calc(1.2rem + 16px);
+    content: "";
+    width: 50px;
+    height: 2px;
+    background-color: var(--accent);
+    will-change: width;
+    transition: width 200ms ease-out;
+}
+.list-head:hover::after {
+    width: 100%;
+}
+.post-link {
+    text-decoration: none;
+    color: var(--secondary);
+    margin: 10px 0;
+}
+.post-link h4 {
+    font-weight: 500;
+    font-size: 1.2rem;
+    margin: 10px 0 4px;
+    color: var(--dark);
+}
+.post-link p {
+    font-size: 0.8rem;
+    font-weight: 300;
+    margin: 0;
+}
+.control {
+    margin: 80px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.control-left {
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+#like-button {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    outline: none;
+    color: var(--dark);
+    background-color: var(--light);
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    transition: border-color 200ms, background-color 200ms, color 200ms, box-shadow 200ms;
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+}
+#like-button:hover {
+    background-color: var(--warning);
+}
+#like-button[liked] {
+    background-color: var(--light);
+    box-shadow: inset 0px 4px 16px rgba(0, 0, 0, 0.08);
+    color: var(--warning);
+}
+#like-button[liked]:hover {
+    color: var(--secondary);
+}

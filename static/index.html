@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="blog.css">
+    <link rel="stylesheet" href="markdown.css">
+    <script src="https://kit.fontawesome.com/f2480ecba9.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="index.js"></script>
+    <script src="blog.js"></script>
+    <title>endaytrer.com</title>
+</head>
+<body>
+    <div class="container top">
+        <h1 id="header" class="hidden">Endaytrer</h1>
+        <code id="console" class="hidden">
+            <div class="padder"></div>
+            <label for="fake-input">
+            <div id="command" buffer="" pointer="0"></div>
+            </label>
+        </code>
+        <input id="fake-input">
+    </div>
+    <div class="blog-section">
+        <div class="container">
+            <div id="list" class="hidden">
+                <div>
+                    <h2 class="list-head">Recent Posts</h2>
+                </div>
+                <div id="title-list"></div>
+            </div>
+            <div id="post" class="hidden">
+                <div id="markdown-body" class="markdown-body"></div>
+                <div class="control">
+                    <div class="control-left">
+                        <div class="view">
+                            <i class="fa-regular fa-eye"></i>
+                            <span id="view-number"></span>
+                        </div>
+                        <div class="like">
+                            <i class="fa-regular fa-heart"></i>
+                            <span id="like-number"></span>
+                        </div>
+                    </div>
+                    <div class="control-right">
+                        <button id="like-button" onclick="handleClick()"><i id="heart-icon" class="fa-regular fa-heart"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="over-panel" class="hidden"></div>
+    <div id="profile-container" class="hidden" onclick="toggleProfile()">
+        <div class="profile" onclick="forbidClosing(event)"><div class="avatar"></div><h1>Daniel Gu</h1><h2>University of Wisconsin-Madison</h2><h2>Xi'an Jiaotong University</h2><h2 class="location"><i class="fa-regular fa-location-dot"></i><b>Suzhou, China</b></h2><div class="links"><a href="https://instagram.com/endaytrer?igshid=YmMyMTA2M2Y=" class="fa-brands fa-instagram"></a><a href="https://twitter.com/endaytrer" class="fa-brands fa-twitter"></a><a href="https://facebook.com/endaytrer" class="fa-brands fa-facebook"></a><a href="https://github.com/endaytrer" class="fa-brands fa-github"></a><a href="mailto:endaytrer@gmail.com" class="fa-regular fa-envelope"></a></div></div>
+    </div>
+</body>
+</html>
