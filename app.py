@@ -70,7 +70,7 @@ def unlike(name):
 def list():
     return [{"name": name, "title": cache[name][0], "lastModified": cache[name][2]} for name in cache.keys()]
 
-cache_updater = Executer(10, Event(), cache, statistics, changed)
+cache_updater = Executer(10, cache, statistics, changed)
 cache_updater.start()
 
 main_thread = Thread(target=lambda: app.run('127.0.0.1', 12897))

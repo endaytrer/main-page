@@ -2,6 +2,7 @@ import threading
 import os
 import csv
 import markdown2
+import time
 
 class Executer(threading.Thread):
     cache: dict[str, list[str, str, float]]
@@ -47,12 +48,12 @@ class Executer(threading.Thread):
     def update(self):
         self.update_cache()
         self.dump_statistic()
+        print("updated")
         
         
 
-    def __init__(self, interval, event, cache: dict[str, tuple[str, str, float]], statistics: dict[str, list[int, int]], changed: list[bool]) -> None:
+    def __init__(self, interval, cache: dict[str, tuple[str, str, float]], statistics: dict[str, list[int, int]], changed: list[bool]) -> None:
         self.cache = cache
-        self.event = event
         self.statistics = statistics
         self.interval = interval
         self.changed = changed
@@ -60,5 +61,6 @@ class Executer(threading.Thread):
     
     def run(self) -> None:
         self.update_cache()
-        while not self.event.wait(self.interval):
+        while True:
+            time.sleep(self.interval)
             self.update()
