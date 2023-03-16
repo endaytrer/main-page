@@ -3,3 +3,4 @@ blogs/*
 venv
 statistic.csv
 static/sites
+*.log
