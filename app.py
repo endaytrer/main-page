@@ -73,5 +73,5 @@ def list():
 cache_updater = Executer(10, Event(), cache, statistics, changed)
 cache_updater.start()
 
-main_thread = Thread(target=lambda: app.run('0.0.0.0', 12897))
+main_thread = Thread(target=lambda: app.run('127.0.0.1', 12897))
 main_thread.start()
