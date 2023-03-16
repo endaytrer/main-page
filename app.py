@@ -9,7 +9,6 @@ cache: dict[str, tuple[str, str, float]] = {}
 statistics: dict[str, list[int, int]] = {}
 changed: list[bool] = [False]
 
-cache_updater = Executer(10, Event(), cache, statistics, changed)
 
 # initialize statistics
 with open('statistic.csv', 'r') as f:
@@ -35,7 +34,7 @@ def index():
 
 @app.route("/sites/<subsite>/")
 def other(subsite):
-    return app.send_static_file(subsite + "/index.html")
+    return app.send_static_file("sites/" + subsite + "/index.html")
 
 @app.route("/api/blogs/content/<name>")
 def blog(name):
@@ -71,6 +70,8 @@ def unlike(name):
 def list():
     return [{"name": name, "title": cache[name][0], "lastModified": cache[name][2]} for name in cache.keys()]
 
-main_thread = Thread(target=lambda: app.run('0.0.0.0', 3000))
-main_thread.start()
+cache_updater = Executer(10, Event(), cache, statistics, changed)
 cache_updater.start()
+
+main_thread = Thread(target=lambda: app.run('0.0.0.0', 12897))
+main_thread.start()
