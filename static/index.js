@@ -9,7 +9,8 @@ const root = [
             "tetris": 1,
             "calculator": 2,
             "sort": 3,
-            "wordle": 4
+            "wordle": 4,
+            "phased-array": 5
         }
     }, {
         "type": 0,
@@ -27,6 +28,10 @@ const root = [
         "type": 0,
         "user": false,
         "content": "/sites/wordle"
+    }, {
+        "type": 0,
+        "user": false,
+        "content": "/sites/phased-array"
     }
 ]
 const systemReserve = 16;
