@@ -608,7 +608,11 @@ function handleInput(key, target) {
         }
     }
 }
-
+window.addEventListener('keydown', function(e) {
+    if(e.key = " " && e.target == document.body) {
+      e.preventDefault();
+    }
+});
 window.onload = async () => {
     const code = document.getElementsByTagName('code')[0];
     const header = document.getElementById('header');
