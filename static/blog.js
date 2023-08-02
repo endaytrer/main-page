@@ -42,6 +42,16 @@ async function renderPost(postName) {
         icon.classList.add("fa-regular");
     }
     body.innerHTML = json.content
+    // preprocess inline-math
+    body.querySelectorAll('inline-math').forEach((val) => {
+        val.setAttribute('latex', val.innerText)
+        katex.render(val.innerText, val)
+    })
+    // preprocess tex-block
+    body.querySelectorAll('tex-block').forEach((val) => {
+        val.setAttribute('latex', val.innerText)
+        katex.render(val.innerText, val, {displayMode: true, throwOnError: true})
+    })
     // preprocess code blocks
     body.querySelectorAll('pre').forEach((val) => {
         const codeBlock = val.querySelector('code');

@@ -47,6 +47,7 @@ let busy = false;
 let requestSubmit = false;
 let editPosition = 0;
 let filesystem;
+const command = document.getElementById("command");
 
 let pwInode = 0;
 function toggleProfile() {
@@ -608,27 +609,35 @@ function handleInput(key, target) {
         }
     }
 }
-window.addEventListener('keydown', function(e) {
-    if(e.key = " " && e.target == document.body) {
-      e.preventDefault();
-    }
-});
-window.onload = async () => {
-    const code = document.getElementsByTagName('code')[0];
+
+async function load() {
+    const code = document.getElementById('console');
     const header = document.getElementById('header');
     const list =  document.getElementById('list');
     const url = new URL(window.location.href)
-    const postName = url.searchParams.get("blog");
+    const postName = url.hash.substring(1)
     if (postName) {
+        console.log(code.classList)
         const post =  document.getElementById('post');
+        code.classList.add('hidden');
+        header.classList.add('hidden');
+        list.classList.add('hidden');
         post.classList.remove('hidden');
         await renderPost(postName);
+        document.onscroll = undefined;
+        document.onkeydown = undefined;
         return;
     }
     code.classList.remove('hidden');
     header.classList.remove('hidden');
     list.classList.remove('hidden')
-    const command = document.getElementById("command");
+    post.classList.add('hidden');
+    // clear input, 
+    stdout = prompt
+    stdin = ""
+    command.innerHTML = "";
+    command.setAttribute("buffer", "")
+    command.setAttribute("pointer", "0")
     let serialized = localStorage.getItem("filesystem");
     if (serialized == null) {
         filesystem = root;
@@ -684,7 +693,7 @@ window.onload = async () => {
     if (savedDelay !== null) {
         delay = parseInt(savedDelay);
     }
-    document.addEventListener("scroll", (e) => {
+    document.onscroll = (e) => {
         if (window.scrollY > 40) {
             code.classList.add("hidden");
             list.classList.add("show-profile");
@@ -692,39 +701,44 @@ window.onload = async () => {
             code.classList.remove("hidden")
             list.classList.remove("show-profile");
         }
-    })
-    document.addEventListener("keypress", (e) => handleInput(e.key, command));
-    document.addEventListener("keydown", (e) => {
+    }
+    document.onkeydown = (e) => {
         if (e.key == 'ArrowLeft' && editPosition > 0) {
             editPosition -= 1;
             if (!busy) {
                 echo(command);
             }
-        }
-        if (e.key == 'ArrowRight' && editPosition < stdin.length) {
+        } else if (e.key == 'ArrowRight' && editPosition < stdin.length) {
             editPosition += 1;
             if (!busy) {
                 echo(command);
             }
-        }
-        if (e.key == 'Delete') {
+        } else if (e.key == 'Delete') {
             stdin = stdin.substring(0, editPosition) + stdin.substring(editPosition + 1);
             if (!busy) {
                 echo(command);
             }
-        } if (e.key == "Backspace") {
+        } else if (e.key == "Backspace") {
             stdin = stdin.substring(0, editPosition - 1) + stdin.substring(editPosition);
             editPosition -= 1;
             if (editPosition < 0) editPosition = 0;
             if (!busy) {
                 echo(command);
-            }
+            } 
+        } else {
+            handleInput(e.key, command);
         }
-    })
+    }
+    loadBlogList();
+    output(command);
+}
+async function loadBlogList() {
     // get blog list
     const resp = await fetch(apiUri + 'blogs/list');
     const blogList = await resp.json();
+    blogList.sort((a, b) => a.lastModified < b.lastModified)
     const titleList = list.querySelector('#title-list')
+    titleList.innerHTML = '';
     let totalLikeCount = 0, totalViewCount = 0;
 
     for (let blog of blogList) {
@@ -733,7 +747,7 @@ window.onload = async () => {
 
         const link = document.createElement('a');
         link.className = "post-link";
-        link.href = `?blog=${name}`;
+        link.href = `#${name}`;
         link.innerHTML = `
             <h4 class="title">${title}</h4>
             <p class="date">${date} · ${likes} likes · ${views} views</p>
@@ -749,5 +763,7 @@ window.onload = async () => {
     readElement.innerText = totalViewCount
     likeElement.innerText = totalLikeCount
     postElement.innerText = blogCount
-    output(command);
+
 }
+window.addEventListener('load', load)
+window.addEventListener('hashchange', load)

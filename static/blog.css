@@ -80,6 +80,7 @@
     right: 0;
     width: 36px;
     height: 36px;
+    overflow: hidden;
     font-size: 1.2rem;
     margin-top: 10px;
     margin-right: 10px;
