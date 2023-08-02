@@ -42,7 +42,7 @@ const root = [
 const systemReserve = 16;
 let successStarter = '<span class="green">❯</span>&nbsp;';
 let failStarter = '<span class="red">❯</span>&nbsp;';
-let prompt = 'Welcome to <a href="/"><b>endaytrer</b>.com</a>. This is <b>Daniel Gu</b>&apos;s personal website, which has a command line interface. <br/>You can also use the links below to quickly access this website.<br/><br/><span class="gray"> - Play tetris?</span> <a href="/sites/tetris">Tetris</a> <br/> <span class="gray"> - Have a look at my calculator?</span> <a href="/sites/calculator">Calculator</a> <br/> <span class="gray"> - Have a look at my sorting demo?</span> <a href="/sites/sort">Sort</a> <br/> <span class="gray"> - Play Wordle?</span> <a href="/sites/wordle">Wordle</a> <br/> <span class="gray"> - Who am I exactly?</span> <a onclick="toggleProfile()" href="#">Profile</a><br/><br/>Type <span class="green">"help"</span> to show all the available commands, type <span class="green">"start"</span> to show this prompt again.<br/><br/>';
+let prompt = 'Welcome to <a href="/"><b>endaytrer</b>.com</a>. This is <b>Daniel Gu</b>&apos;s personal website, which has a command line interface. <br/>You can also use the links below to quickly access this website.<br/><br/><span class="gray"> - Play tetris?</span> <a href="/sites/tetris">Tetris</a> <br/> <span class="gray"> - Have a look at my calculator?</span> <a href="/sites/calculator">Calculator</a> <br/> <span class="gray"> - Have a look at my sorting demo?</span> <a href="/sites/sort">Sort</a> <br/> <span class="gray"> - Play Wordle?</span> <a href="/sites/wordle">Wordle</a> <br/><br/>Type <span class="green">"help"</span> to show all the available commands, type <span class="green">"start"</span> to show this prompt again.<br/><br/>';
 let profile = '<div class="profile"><div class="avatar"></div><h1>Daniel Gu</h1><h2>University of Wisconsin-Madison</h2><h2>Xi&apos;an Jiaotong University</h2><h2 class="location"><i class="fa-regular fa-location-dot"></i><b>Suzhou, China</b></h2><div class="links"><a href="https://instagram.com/endaytrer?igshid=YmMyMTA2M2Y=" class="fa-brands fa-instagram"></a><a href="https://twitter.com/endaytrer" class="fa-brands fa-twitter"></a><a href="https://facebook.com/endaytrer" class="fa-brands fa-facebook"></a><a href="https://github.com/endaytrer" class="fa-brands fa-github"></a><a href="mailto:endaytrer@gmail.com" class="fa-regular fa-envelope"></a></div></div>';
 const helpText = "<b>endaytrer.com</b> Help Document<br/><br/><b>Usage:</b> program [..args] ([ > file] | [ >> file])<br/><br/><br/><b>Programs:</b><br/><br/>&nbsp;&nbsp;- Information Commands:<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>help</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Show help document. <br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>start</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show starting prompt. <br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>profile</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Show my profile. <br/><br/>&nbsp;&nbsp;- Filesystem Commands:<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>ls [dir]</b>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Show the contents in directory. If [dir] is not provided, show the contents in present working directory.<br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>pwd</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Show present working directory.<br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>cd dir</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Change directory to `dir`.<br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>mkdir dir</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Create a directory at `dir`. If the parent directory of `dir` does not exist, `dir` will not be created.<br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>touch file</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Create a file `file`. If the parent directory of `file` does not exist, `file` will not be created.<br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>rm file</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Remove file or directory `file`. If a directory is passed into `file`, remove it recursively.<br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>reset</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reset the filesystem to default. <b>**NOTICE: THE OPERATION IS IRREVERSIBLE**</b><br/><br/>- File/IO Commands:<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>open file</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Open a website, whose URL is given by the content of `file`.<br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>cat file</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Put content of `file` into STDOUT.<br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>echo [..args]</b>&nbsp;&nbsp;&nbsp;&nbsp; Print [..args] into STDOUT.<br/><br/>- Other Commands<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>setdelay delay</b>&nbsp;&nbsp;&nbsp;&nbsp;Set the delay of each character printing to delay (Unit: <i>ms</i>)<br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>clear</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Clear screen.<br/><br/><br/><b>Redirection System</b><br/><br/>&nbsp;&nbsp;By default, the output (STDOUT) is directly put into the CLI. However, if the following redirection is used, it will output into a file.<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>program [..args] > file</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;Output will overwrite `file`. If file does not exist, an error will be returned.<br/>&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>program [..args] >> file</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;Output will be append to the last of `file`. If file does not exist, an error will be returned.<br/>"
 let stdin = "";
@@ -692,8 +692,10 @@ window.onload = async () => {
     document.addEventListener("scroll", (e) => {
         if (window.scrollY > 40) {
             code.classList.add("hidden");
+            list.classList.add("show-profile");
         } else {
             code.classList.remove("hidden")
+            list.classList.remove("show-profile");
         }
     })
     document.addEventListener("keypress", (e) => handleInput(e.key, command));
@@ -727,8 +729,11 @@ window.onload = async () => {
     // get blog list
     const resp = await fetch(apiUri + 'blogs/list');
     const blogList = await resp.json();
+    const titleList = list.querySelector('#title-list')
+    let totalLikeCount = 0, totalViewCount = 0;
+
     for (let blog of blogList) {
-        const {name, title, lastModified} = blog;
+        const {name, title, lastModified, views, likes} = blog;
         const date = new Date(lastModified * 1000).toLocaleDateString();
 
         const link = document.createElement('a');
@@ -736,9 +741,18 @@ window.onload = async () => {
         link.href = `?blog=${name}`;
         link.innerHTML = `
             <h4 class="title">${title}</h4>
-            <p class="date">${date}</p>
+            <p class="date">${date} · ${likes} likes · ${views} views</p>
         `
-        list.appendChild(link);
+        titleList.appendChild(link);
+        totalLikeCount += likes;
+        totalViewCount += views;
     }
+    const blogCount = blogList.length
+    const readElement = document.getElementById("read-count")
+    const likeElement = document.getElementById("like-count")
+    const postElement = document.getElementById("post-count")
+    readElement.innerText = totalViewCount
+    likeElement.innerText = totalLikeCount
+    postElement.innerText = blogCount
     output(command);
 }

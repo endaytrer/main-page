@@ -42,6 +42,31 @@ async function renderPost(postName) {
         icon.classList.add("fa-regular");
     }
     body.innerHTML = json.content
+    // preprocess code blocks
+    body.querySelectorAll('pre').forEach((val) => {
+        const codeBlock = val.querySelector('code');
+        const lines = codeBlock.innerHTML.split('\n').slice(0, -1);
+        val.innerHTML = '';
+        lines.forEach((line, index) => {
+            const lineElement = document.createElement("code");
+            lineElement.innerHTML = line;
+            val.appendChild(lineElement)
+            if (index != lines.length - 1)
+                val.innerHTML += '\n'
+        });
+        const copyButton = document.createElement("button");
+        copyButton.className="copy-button"
+        copyButton.innerHTML = '<i class="fa-regular fa-clipboard"></i>'
+        val.appendChild(copyButton)
+        copyButton.addEventListener('click', (e) => {
+            navigator.clipboard.writeText(val.innerText)
+            val.setAttribute("copied", "true")
+            setTimeout(() => {
+                val.removeAttribute("copied");
+            }, 500)
+        });
+
+    })
     view.innerHTML = json.views
     like.innerHTML = json.likes
 }
