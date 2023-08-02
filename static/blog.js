@@ -44,13 +44,17 @@ async function renderPost(postName) {
     body.innerHTML = json.content
     // preprocess inline-math
     body.querySelectorAll('inline-math').forEach((val) => {
-        val.setAttribute('latex', val.innerText)
-        katex.render(val.innerText, val)
+        const latex = val.innerText;
+        katex.render(val.innerText, val, {displayMode: false, throwOnError: true})
+        val.children[0].setAttribute('latex', latex)
+        val.outerHTML = val.innerHTML
     })
     // preprocess tex-block
     body.querySelectorAll('tex-block').forEach((val) => {
-        val.setAttribute('latex', val.innerText)
+        const latex = val.innerText;
         katex.render(val.innerText, val, {displayMode: true, throwOnError: true})
+        val.children[0].setAttribute('latex', latex)
+        val.outerHTML = val.innerHTML
     })
     // preprocess code blocks
     body.querySelectorAll('pre').forEach((val) => {

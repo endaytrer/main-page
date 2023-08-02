@@ -81,7 +81,7 @@
     width: 36px;
     height: 36px;
     overflow: hidden;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-top: 10px;
     margin-right: 10px;
     border: 2px solid rgba(0, 0, 0, 0.08);
@@ -127,4 +127,39 @@
     font-size: 1.6rem;
     color: white;
     font-family: "Raleway", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+span.katex {
+    display: inline-flex;
+    position: relative;
+
+}
+span.katex-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+span.katex::after,
+span.katex-display::after {
+    position: absolute;
+    width: fit-content;
+    padding: 4px 8px;
+    color: var(--light);
+    top: 100%;
+    font-size: 0.7rem;
+    font-family: 'Fira Mono', monospace;
+    background-color: rgba(110, 110, 110, 0.4);
+    border-radius: 8px;
+    content: attr(latex);
+    /* backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px); */
+    opacity: 0;
+    transition: opacity 200ms ease-out;
+}
+
+span.katex:hover::after,
+span.katex-display:hover::after,
+span.katex:hover::after,
+span.katex-display:hover::after {
+    opacity: 1;
 }
