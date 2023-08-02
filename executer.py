@@ -1,7 +1,8 @@
 import threading
 import os
 import csv
-import markdown2
+import markdown
+from markdown_katex.extension import tex2html
 import time
 
 class Executer(threading.Thread):
@@ -23,9 +24,42 @@ class Executer(threading.Thread):
             with open("blogs/" + post, 'r') as f:
                 content = f.read()
                 title = content.split('\n')[0].strip('#').strip()
+                # pass 1, render basic html
+                content = markdown.markdown(content, extensions=["markdown.extensions.extra", "markdown.extensions.codehilite"])
+                blocks = content.split("$$")
+                # pass 1, render block TeX
+                content = ""
+                isTeXBlock = False
+                for block in blocks:
+                    if not isTeXBlock:
+                        content += block
+                        isTeXBlock = True
+                        continue
+                    try:
+                        html = tex2html(block, {'no_inline_svg': True, 'insert_fonts_css': False, 'display-mode': True})
+                        content += html
+                    finally:
+                        isTeXBlock = False
+                # pass 3, render inline TeX
+                blocks = content.split("$")
+                # pass 1, render block TeX
+                content = ""
+                isTeXInline = False
+                for block in blocks:
+                    if not isTeXInline:
+                        content += block
+                        isTeXInline = True
+                        continue
+                    try:
+                        html: str = tex2html(block, {'no_inline_svg': True, 'insert_fonts_css': False})
+                        content += html
+                    finally:
+                        isTeXInline = False
+
+                
                 self.cache[post] = (
                     title,
-                    markdown2.markdown(content, extras=["footnotes", "tables", "fenced-code-blocks"]),
+                    content,
                     mtime
                 )
         if len(nameSet) == 0:

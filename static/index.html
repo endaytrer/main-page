@@ -8,30 +8,60 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="blog.css">
     <link rel="stylesheet" href="markdown.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
     <script src="https://kit.fontawesome.com/f2480ecba9.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="index.js"></script>
     <script src="blog.js"></script>
     <title>endaytrer.com</title>
 </head>
 <body>
     <div class="container top">
-        <h1 id="header" class="hidden">Endaytrer</h1>
+        <h1 id="header" class="hidden">Daniel Gu</h1>
         <code id="console" class="hidden">
             <div class="padder"></div>
             <label for="fake-input">
             <div id="command" buffer="" pointer="0"></div>
             </label>
         </code>
-        <input id="fake-input">
+        <input id="fake-input" autofocus>
     </div>
     <div class="blog-section">
         <div class="container">
             <div id="list" class="hidden">
-                <div>
-                    <h2 class="list-head">Recent Posts</h2>
+                <div class="list-profile">
+                    <div class="avatar"></div>
+                    <h2 class="name">Daniel Gu</h2>
+                    <p class="bio">La liberté guidant le peuple.</p>
+                    <div class="stats">
+                        <div class="col">
+                            <div class="stat-number" id="post-count">0</div>
+                            <div class="col-name">Posts</div>
+                        </div>
+                        <div class="col">
+                            <div class="stat-number" id="like-count">0</div>
+                            <div class="col-name">Likes</div>
+                        </div>
+                        <div class="col">
+                            <div class="stat-number" id="read-count">0</div>
+                            <div class="col-name">Reads</div>
+                        </div>
+                    </div>
+                    <p class="info">University of Wisconsin - Madison</p>
+                    <p class="info">Xi'an Jiaotong University</p>
+                    <p class="info"><i class="fa-regular fa-location-dot"></i> <b>Suzhou, China</b></p>
+                    <br>
+                    <a href="https://github.com/endaytrer" class="link"><i class="fa-brands fa-github"></i> endaytrer</a>
+                    <a href="mailto:endaytrer@gmail.com" class="link"><i class="fa-regular fa-envelope"></i> endaytrer@gmail.com</a>
+
                 </div>
-                <div id="title-list"></div>
+                <div class="list-main">
+                    <h2 class="list-head">Recent Posts</h2>
+                    <div id="title-list"></div>
+                    <h2 class="list-head">Links</h2>
+                    <div class="link-list">
+                        <a href="https://jiaangk.github.io">Zhizhen Chen's Blog</a>
+                    </div>
+                </div>
             </div>
             <div id="post" class="hidden">
                 <div id="markdown-body" class="markdown-body"></div>
@@ -52,12 +82,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-
-    <div id="over-panel" class="hidden"></div>
-    <div id="profile-container" class="hidden" onclick="toggleProfile()">
-        <div class="profile" onclick="forbidClosing(event)"><div class="avatar"></div><h1>Daniel Gu</h1><h2>University of Wisconsin-Madison</h2><h2>Xi'an Jiaotong University</h2><h2 class="location"><i class="fa-regular fa-location-dot"></i><b>Suzhou, China</b></h2><div class="links"><a href="https://instagram.com/endaytrer?igshid=YmMyMTA2M2Y=" class="fa-brands fa-instagram"></a><a href="https://twitter.com/endaytrer" class="fa-brands fa-twitter"></a><a href="https://facebook.com/endaytrer" class="fa-brands fa-facebook"></a><a href="https://github.com/endaytrer" class="fa-brands fa-github"></a><a href="mailto:endaytrer@gmail.com" class="fa-regular fa-envelope"></a></div></div>
     </div>
 </body>
 </html>

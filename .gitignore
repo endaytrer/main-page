@@ -1,5 +1,6 @@
 __pycache__
 blogs/*
+static/*.assets
 venv
 statistic.csv
 static/sites

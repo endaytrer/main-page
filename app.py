@@ -1,6 +1,6 @@
 import json
 import csv
-from threading import Lock, Event, Thread
+from threading import Thread
 from executer import Executer
 from flask import Flask
 app = Flask(__name__, static_url_path="/")
@@ -68,7 +68,14 @@ def unlike(name):
 
 @app.route("/api/blogs/list")
 def list():
-    return [{"name": name, "title": cache[name][0], "lastModified": cache[name][2]} for name in cache.keys()]
+    ans = []
+    for name in cache.keys():
+        views = 0
+        likes = 0
+        if name in statistics:
+            views, likes = statistics[name]
+        ans.append({"name": name, "title": cache[name][0], "lastModified": cache[name][2], "views": views, "likes": likes})
+    return ans
 
 cache_updater = Executer(10, cache, statistics, changed)
 cache_updater.start()
