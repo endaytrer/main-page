@@ -55,7 +55,7 @@ body {
     margin: 20px 0 30px;
 }
 #console {
-    font-size: 1.1rem;
+    font-size: 1rem;
     box-sizing: border-box;
     width: 100%;
     margin: 20px 0 80px;
@@ -71,6 +71,7 @@ body {
     justify-content:space-between;
     will-change: height;
     transition: height 400ms ease-out, margin 400ms ease-out;
+    font-family: 'Fira Mono', monospace;
 }
 #console.hidden {
     padding: 0 20px 0 20px;

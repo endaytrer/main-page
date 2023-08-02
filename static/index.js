@@ -10,7 +10,8 @@ const root = [
             "calculator": 2,
             "sort": 3,
             "wordle": 4,
-            "phased-array": 5
+            "phased-array": 5,
+	    "path-tracing-webgl": 6
         }
     }, {
         "type": 0,
@@ -32,6 +33,10 @@ const root = [
         "type": 0,
         "user": false,
         "content": "/sites/phased-array"
+    }, {
+	"type": 0,
+	"user": false,
+	"content": "/sites/path-tracing-webgl"
     }
 ]
 const systemReserve = 16;

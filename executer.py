@@ -48,7 +48,6 @@ class Executer(threading.Thread):
     def update(self):
         self.update_cache()
         self.dump_statistic()
-        print("updated")
         
         
 
@@ -62,5 +61,6 @@ class Executer(threading.Thread):
     def run(self) -> None:
         self.update_cache()
         while True:
+            print("updated")
             time.sleep(self.interval)
             self.update()
