@@ -41,6 +41,7 @@ async function renderPost(postName) {
         icon.classList.remove("fa-solid");
         icon.classList.add("fa-regular");
     }
+    document.title = json.title;
     body.innerHTML = json.content
     // preprocess inline-math
     body.querySelectorAll('inline-math').forEach((val) => {

@@ -622,8 +622,7 @@ async function load() {
     const url = new URL(window.location.href)
     const postName = url.hash.substring(1)
     if (postName) {
-        console.log(code.classList)
-        const post =  document.getElementById('post');
+        const post = document.getElementById('post');
         code.classList.add('hidden');
         header.classList.add('hidden');
         list.classList.add('hidden');
