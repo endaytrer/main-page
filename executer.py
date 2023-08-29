@@ -40,7 +40,7 @@ class TexExtension(markdown.Extension):
         md.preprocessors.register(TexBlockPreprocessor(md), 'tex-block', 25)
         inline_math_re = r'(\$)(.*?)\$'
         inline_math_tag = SimpleTagPattern(inline_math_re, 'inline-math')
-        md.inlinePatterns.register(inline_math_tag, 'inline-math', 200)
+        md.inlinePatterns.register(inline_math_tag, 'inline-math', 190)
 
         
 
