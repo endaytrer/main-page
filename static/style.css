@@ -404,7 +404,12 @@ body {
 .list-main {
     flex: 1;
 }
+.link-list {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
 .link-list a {
-
     color: inherit;
+    margin: 10px 0;
 }
