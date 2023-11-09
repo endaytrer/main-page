@@ -300,8 +300,7 @@ body {
         margin-left: -100px;
     }
 }
-#list.hidden,
-#post.hidden {
+.hidden {
     display: none;
 }
 
@@ -412,4 +411,91 @@ body {
 .link-list a {
     color: inherit;
     margin: 10px 0;
+}
+
+#notification {
+    box-sizing: border-box;
+    z-index: 20;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: fixed;
+    min-height: 260px;
+    width: calc(100% - 20px);
+    max-width: 600px;
+    background-color: var(--light);
+    color: var(--dark);
+    padding: 25px;
+    top: calc(50% - 150px);
+    box-shadow: 0 0 10000px 10000px rgba(0, 0, 0, 0.4);
+}
+.hstack {
+    display: flex;
+    flex-direction: row;
+}
+
+.vstack {
+    display: flex;
+    flex-direction: column;
+}
+#notification > .hstack.info {
+    align-items: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+#notification > .hstack.info > .vstack {
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0;
+}
+#notification .vstack:nth-child(1) h2 {
+    font-size: 1.0rem;
+    color:var(--secondary);
+}
+#notification .vstack:nth-child(2) h2 {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color:var(--accent);
+}
+#notification .newdomain h2 {
+    position: relative;
+
+}
+#notification h2 {
+    margin: 0.2em;
+}
+#notification .arrow {
+    font-weight: bold;
+    color: var(--accent);
+    font-size: 2rem;
+}
+
+#notification-acknowledge {
+    align-self: center;
+    font-size: 0.9rem;
+    border: none;
+    outline: none;
+    width: 80px;
+    height: 40px;
+    cursor: pointer;
+    border-radius: 0;
+    border-bottom: 4px solid var(--accent);
+    background-color: rgb(231, 233, 238);
+    transition: background-color 200ms ease-out;
+    font-family: inherit;
+}
+#notification-acknowledge:hover {
+    background-color: rgb(213, 217, 224);
+}
+#notification .hstack.buttons {
+    align-items: center;
+    justify-content: flex-start;
+}
+#notification .hstack.buttons a {
+    color: var(--dark);
+    margin-left: 20px;
+}
+#notification.hidden {
+    display: none;
 }
