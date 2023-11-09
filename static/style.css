@@ -300,7 +300,9 @@ body {
         margin-left: -100px;
     }
 }
-.hidden {
+#list.hidden,
+#post.hidden,
+#notification.hidden {
     display: none;
 }
 

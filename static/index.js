@@ -617,6 +617,7 @@ function handleInput(key, target) {
     }
 }
 function acknowledge_notification() {
+    console.log("ack")
     notification.classList.add('hidden');
     localStorage.setItem('acknowledged', Date.now());
 }
@@ -624,7 +625,6 @@ async function load() {
     /**
      * Temporary box indicating
      */
-    notification.addEventListener('click', acknowledge_notification);
     const code = document.getElementById('console');
     const header = document.getElementById('header');
     const list =  document.getElementById('list');
@@ -642,8 +642,9 @@ async function load() {
         document.onkeydown = undefined;
         return;
     }
-    if (localStorage.getItem('acknowledged')) {
-        notification.classList.add('hidden')
+    document.getElementById('notification-acknowledge').addEventListener('click', acknowledge_notification);
+    if (!localStorage.getItem('acknowledged')) {
+        notification.classList.remove('hidden')
     }
     code.classList.remove('hidden');
     header.classList.remove('hidden');
