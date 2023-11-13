@@ -501,3 +501,30 @@ body {
 #notification.hidden {
     display: none;
 }
+footer {
+    width: 100%;
+    background-color: var(--dark);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+}
+
+footer > main {
+    margin: 20px;
+    width: calc(100% - 50px);
+    font-size: 0.8rem;
+}
+@media screen and (min-width: 1000px) {
+    footer > main {
+        width: 60%;
+    }
+}
+footer small {
+    color: var(--unimportant);
+    font-size: 0.6rem;
+    line-height: 0.4em;
+    height: 100%;
+}
+footer a {
+    color: inherit;
+}
