@@ -45,43 +45,49 @@ export async function renderPost(postName) {
     }
     document.title = json.title;
     body.innerHTML = parse(json.content)
-    // preprocess inline-math
-    body.querySelectorAll('inline-math').forEach((val) => {
-        const latex = val.innerText;
-        katex.render(val.innerText, val, {displayMode: false, throwOnError: true})
-        val.children[0].setAttribute('latex', latex)
-        val.outerHTML = val.innerHTML
+
+    // postprocess latex
+    renderMathInElement(body, {
+        delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false},
+        ],
+        throwOnError: false
     })
-    // preprocess tex-block
-    body.querySelectorAll('tex-block').forEach((val) => {
-        const latex = val.innerText;
-        katex.render(val.innerText, val, {displayMode: true, throwOnError: true})
-        val.children[0].setAttribute('latex', latex)
-        val.outerHTML = val.innerHTML
-    })
-    // preprocess code blocks
-    body.querySelectorAll('pre').forEach((val) => {
-        const codeBlock = val.querySelector('code');
-        const lines = codeBlock.innerHTML.split('\n').slice(0, -1);
-        val.innerHTML = '';
+
+    // postprocess code blocks
+    body.querySelectorAll('.pre-wrapper').forEach((wrapper) => {
+        let title = document.createElement('div');
+        title.className="pre-title"
+
+        let titleLabel = document.createElement('span');
+        if (wrapper.getAttribute('lang'))
+            titleLabel.innerText = "Language: " + wrapper.getAttribute('lang');
+        title.appendChild(titleLabel);
+
+        let pre = wrapper.querySelector('pre');
+        pre.style = undefined;
+        const lines = pre.innerHTML.split('\n').slice(0, -1);
+        pre.innerHTML = '';
         lines.forEach((line, index) => {
             const lineElement = document.createElement("code");
             lineElement.innerHTML = line;
-            val.appendChild(lineElement)
+            pre.appendChild(lineElement)
             if (index != lines.length - 1)
-                val.innerHTML += '\n'
+                pre.innerHTML += '\n'
         });
         const copyButton = document.createElement("button");
         copyButton.className="copy-button"
         copyButton.innerHTML = '<i class="fa-regular fa-clipboard"></i>'
-        val.appendChild(copyButton)
-        copyButton.addEventListener('click', (e) => {
-            navigator.clipboard.writeText(val.innerText)
-            val.setAttribute("copied", "true")
+        copyButton.addEventListener('click', (_) => {
+            navigator.clipboard.writeText(pre.innerText)
+            pre.setAttribute("copied", "true")
             setTimeout(() => {
-                val.removeAttribute("copied");
+                pre.removeAttribute("copied");
             }, 500)
         });
+        title.appendChild(copyButton)
+        wrapper.insertBefore(title, wrapper.firstChild);
 
     })
     view.innerHTML = json.views

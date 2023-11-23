@@ -1,6 +1,3 @@
-CC = clang
-CFLAGS = -I/opt/homebrew/opt/llvm/include
-
 LIBMARKDOWN := libmarkdown
 STATIC := static
 
@@ -18,7 +15,7 @@ $(STATIC)/modules/%: %/pkg
 	rm -rf $@
 	cp -r $< $@
 
-$(LIBMARKDOWN)/pkg: $(LIBMARKDOWN_SRC)
+$(LIBMARKDOWN)/pkg: $(LIBMARKDOWN_SRC) $(LIBMARKDOWN)/Cargo.toml
 	(cd $(LIBMARKDOWN) && wasm-pack build --target web)
 
 clean:

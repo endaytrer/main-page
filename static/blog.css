@@ -68,30 +68,48 @@
 #like-button[liked]:hover {
     color: var(--secondary);
 }
+
 .markdown-body pre {
     position: relative;
+    overflow: auto;
     counter-reset: line;
     transition: background-color 200ms ease-out;
 }
-.markdown-body pre > .copy-button {
-    cursor: pointer;
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 36px;
+.markdown-body .pre-wrapper {
+    position: relative;
+    margin: 20px 0;
+    background-color: var(--light);
+    box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.03);
+}
+.markdown-body .pre-wrapper > .pre-title {
+    box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgb(84, 204, 228);
+    border-radius: 6px 6px 0 0;
     height: 36px;
+    color: var(--light);
+}
+.markdown-body .pre-wrapper > .pre-title > span {
+    margin-left: 30px;
+}
+.markdown-body .pre-wrapper .copy-button {
+    color: inherit;
+    cursor: pointer;
     overflow: hidden;
-    font-size: 1.1rem;
-    margin-top: 10px;
+    font-size: 1rem;
     margin-right: 10px;
-    border: 2px solid rgba(0, 0, 0, 0.08);
+    height: 28px;
+    width: 28px;
+    border: none;
+    outline: none;
     border-radius: 1000px;
     background-color: transparent;
-    transition: background-color 200ms ease-out;
-    color: rgba(107, 107, 107, 0.5);
+    transition: background-color 200ms ease-out, color 200ms ease-out;
 }
-.markdown-body pre > .copy-button:hover {
-    background-color: rgba(0, 0, 0, 0.08);
+.markdown-body .pre-wrapper  .copy-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 .markdown-body pre > code {
     counter-increment: line;
@@ -109,7 +127,7 @@
 }
 
 .markdown-body pre[copied="true"]{
-    background-color: rgba(0, 0, 0, 0.08);
+    background-color: rgba(0, 0, 0, 0.03);
 }
 
 .markdown-body pre[copied="true"]::after {
@@ -122,44 +140,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(0, 0, 0, 0.08);
+    background-color: rgba(0, 0, 0, 0.03);
     text-align: center;
     font-size: 1.6rem;
     color: white;
     font-family: "Raleway", "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-span.katex {
-    display: inline-flex;
-    position: relative;
-
-}
-span.katex-display {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-}
-span.katex::after,
-span.katex-display::after {
-    position: absolute;
-    width: fit-content;
-    padding: 4px 8px;
-    color: var(--light);
-    top: 100%;
-    font-size: 0.7rem;
-    font-family: 'Fira Mono', monospace;
-    background-color: rgba(110, 110, 110, 0.4);
-    border-radius: 8px;
-    content: attr(latex);
-    /* backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px); */
-    opacity: 0;
-    transition: opacity 200ms ease-out;
-}
-
-span.katex:hover::after,
-span.katex-display:hover::after,
-span.katex:hover::after,
-span.katex-display:hover::after {
-    opacity: 1;
 }
