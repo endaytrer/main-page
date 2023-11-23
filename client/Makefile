@@ -1,5 +1,5 @@
 LIBMARKDOWN := libmarkdown
-STATIC := static
+STATIC := www
 
 WASM_LIBS := $(LIBMARKDOWN)
 
@@ -7,7 +7,10 @@ TARGETS := $(patsubst %, $(STATIC)/modules/%, $(WASM_LIBS))
 
 LIBMARKDOWN_SRC := $(wildcard $(LIBMARKDOWN)/src/*.rs)
 
-.PHONY: all clean 
+.PHONY: dockerimage all clean 
+
+dockerimage: $(TARGETS)
+	docker build . --tag endaytrer/main-page-client
 
 all: $(TARGETS)
 

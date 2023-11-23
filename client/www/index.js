@@ -642,9 +642,9 @@ async function load() {
         list.classList.add('hidden');
         notification.classList.add('hidden');
         post.classList.remove('hidden');
-        await renderPost(postName);
         document.onscroll = undefined;
         document.onkeydown = undefined;
+        await renderPost(postName);
         return;
     }
     document.getElementById('notification-acknowledge').addEventListener('click', acknowledge_notification);
@@ -759,36 +759,34 @@ async function load() {
     output(command);
 }
 async function loadBlogList() {
-    // get blog list
-    const resp = await fetch(apiUri + 'blogs/list');
-    const blogList = await resp.json();
-    blogList.sort((a, b) => a.lastModified < b.lastModified)
-    const titleList = list.querySelector('#title-list')
-    titleList.innerHTML = '';
-    let totalLikeCount = 0, totalViewCount = 0;
-
-    for (let blog of blogList) {
-        const {name, title, lastModified, views, likes} = blog;
-        const date = new Date(lastModified * 1000).toLocaleDateString();
-
-        const link = document.createElement('a');
-        link.className = "post-link";
-        link.href = `#${name}`;
-        link.innerHTML = `
-            <h4 class="title">${title}</h4>
-            <p class="date">${date} · ${likes} likes · ${views} views</p>
-        `
-        titleList.appendChild(link);
-        totalLikeCount += likes;
-        totalViewCount += views;
-    }
-    const blogCount = blogList.length
+    // get total count, reads, likes
+    const summary = await (await fetch(apiUri + 'blogs/count')).json()
     const readElement = document.getElementById("read-count")
     const likeElement = document.getElementById("like-count")
     const postElement = document.getElementById("post-count")
-    readElement.innerText = totalViewCount
-    likeElement.innerText = totalLikeCount
-    postElement.innerText = blogCount
+    readElement.innerText = summary.reads
+    likeElement.innerText = summary.likes
+    postElement.innerText = summary.count
+
+    // get blog list
+    const resp = await fetch(apiUri + 'blogs/list');
+    const blogList = await resp.json();
+    const titleList = list.querySelector('#title-list')
+    titleList.innerHTML = '';
+
+    for (let blog of blogList) {
+        const {id, title, reads, likes, created} = blog;
+        const date = new Date(created).toLocaleDateString();
+
+        const link = document.createElement('a');
+        link.className = "post-link";
+        link.href = `#${id}`;
+        link.innerHTML = `
+            <h4 class="title">${title}</h4>
+            <p class="date">${date} · ${likes} likes · ${reads} views</p>
+        `
+        titleList.appendChild(link);
+    }
 
 }
 window.addEventListener('load', load)

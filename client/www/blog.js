@@ -1,7 +1,7 @@
 import { parse } from "./modules/libmarkdown/libmarkdown.js"
 export const apiUri = "/api/"
 
-async function handleClick() {
+function handleClick() {
     const icon = document.getElementById('heart-icon')
     const like = document.getElementById('like-number')
     const button = document.getElementById('like-button')
@@ -12,14 +12,14 @@ async function handleClick() {
         icon.classList.remove("fa-solid");
         icon.classList.add("fa-regular");
         like.innerHTML = parseInt(like.innerText) - 1;
-        await fetch(apiUri + 'blogs/unlike/' + name);
+        fetch(apiUri + 'blogs/unlike/' + name);
     } else {
         button.setAttribute("liked", true);
         localStorage.setItem(name + "#liked", true);
         icon.classList.remove("fa-regular");
         icon.classList.add("fa-solid");
         like.innerHTML = parseInt(like.innerText) + 1;
-        await fetch(apiUri + 'blogs/like/' + name);
+        fetch(apiUri + 'blogs/like/' + name);
     }
 }
 
@@ -30,7 +30,8 @@ export async function renderPost(postName) {
     const like = document.getElementById('like-number')
     const icon = document.getElementById('heart-icon')
     document.querySelector("#like-button").addEventListener('click', handleClick)
-    const resp = await fetch(apiUri + 'blogs/content/' + postName);
+    const content = await(await fetch('blogs/' + postName)).text();
+    const resp = await fetch(apiUri + 'blogs/stat/' + postName);
     const json = await resp.json();
     button.setAttribute("name", postName);
 
@@ -44,7 +45,7 @@ export async function renderPost(postName) {
         icon.classList.add("fa-regular");
     }
     document.title = json.title;
-    body.innerHTML = parse(json.content)
+    body.innerHTML = parse(content)
 
     // postprocess latex
     renderMathInElement(body, {
@@ -55,6 +56,11 @@ export async function renderPost(postName) {
         throwOnError: false
     })
 
+    // postprocess image blocks
+    body.querySelectorAll("img").forEach((img) => {
+        let url = new URL(img.src)
+        img.src = url.origin + "/blogs" + url.pathname + url.search + url.hash
+    })
     // postprocess code blocks
     body.querySelectorAll('.pre-wrapper').forEach((wrapper) => {
         let title = document.createElement('div');
@@ -90,6 +96,6 @@ export async function renderPost(postName) {
         wrapper.insertBefore(title, wrapper.firstChild);
 
     })
-    view.innerHTML = json.views
+    view.innerHTML = json.reads
     like.innerHTML = json.likes
 }
