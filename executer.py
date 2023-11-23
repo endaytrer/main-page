@@ -6,43 +6,6 @@ import markdown
 import time
 import re
 
-from markdown.core import Markdown
-from markdown.inlinepatterns import SimpleTagPattern
-from markdown.preprocessors import Preprocessor
- 
-class TexBlockPreprocessor(Preprocessor):
-    TEX_RE = re.compile(r"(\$\$)[ ]*\n(.*?)(?<=\n)(\$\$)[ ]*", re.MULTILINE | re.DOTALL | re.VERBOSE)
-
-    def __init__(self, md: Markdown | None = None) -> None:
-        super().__init__(md)
-    def run(self, lines: list[str]) -> list[str]:
-        text = "\n".join(lines)
-        while True:
-            m = self.TEX_RE.search(text)
-            if m:
-                code = "<tex-block>" + self._escape(m.group(2)) + "</tex-block>"
-                placeholder = self.md.htmlStash.store(code)
-                text = f'{text[:m.start()]}\n{placeholder}\n{text[m.end():]}'
-            else:
-                break
-        return text.split('\n')
-
-    def _escape(self, txt):
-        """ basic html escaping """
-        txt = txt.replace('&', '&amp;')
-        txt = txt.replace('<', '&lt;')
-        txt = txt.replace('>', '&gt;')
-        txt = txt.replace('"', '&quot;')
-        return txt
-
-class TexExtension(markdown.Extension):
-    def extendMarkdown(self, md: Markdown) -> None:
-        md.preprocessors.register(TexBlockPreprocessor(md), 'tex-block', 25)
-        inline_math_re = r'(\$)(.*?)\$'
-        inline_math_tag = SimpleTagPattern(inline_math_re, 'inline-math')
-        md.inlinePatterns.register(inline_math_tag, 'inline-math', 190)
-
-        
 
 class Executer(threading.Thread):
     cache: dict[str, list[str, str, float]]
@@ -64,10 +27,10 @@ class Executer(threading.Thread):
                 content = f.read()
                 title = content.split('\n')[0].strip('#').strip()
                 # pass 1, render basic html
-                try:
-                    content = markdown.markdown(content, extensions=["markdown.extensions.extra", "markdown.extensions.codehilite", TexExtension()])
-                except:
-                    print("cannot parse markdown of {}".format(post), file=sys.stderr)
+                # try:
+                #     content = markdown.markdown(content, extensions=["markdown.extensions.extra", "markdown.extensions.codehilite"])
+                # except:
+                #     print("cannot parse markdown of {}".format(post), file=sys.stderr)
 
                 self.cache[post] = (
                     title,

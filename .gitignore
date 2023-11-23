@@ -5,3 +5,6 @@ venv
 statistic.csv
 static/sites
 *.log
+libmarkdown/pkg
+libmarkdown/target
+libmarkdown/Cargo.lock
