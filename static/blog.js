@@ -1,4 +1,5 @@
-const apiUri = "/api/"
+import { parse } from "./modules/libmarkdown/libmarkdown.js"
+export const apiUri = "/api/"
 
 async function handleClick() {
     const icon = document.getElementById('heart-icon')
@@ -22,12 +23,13 @@ async function handleClick() {
     }
 }
 
-async function renderPost(postName) {
+export async function renderPost(postName) {
     const body = document.getElementById('markdown-body')
     const button = document.getElementById('like-button')
     const view = document.getElementById('view-number')
     const like = document.getElementById('like-number')
     const icon = document.getElementById('heart-icon')
+    document.querySelector("#like-button").addEventListener('click', handleClick)
     const resp = await fetch(apiUri + 'blogs/content/' + postName);
     const json = await resp.json();
     button.setAttribute("name", postName);
@@ -42,7 +44,7 @@ async function renderPost(postName) {
         icon.classList.add("fa-regular");
     }
     document.title = json.title;
-    body.innerHTML = json.content
+    body.innerHTML = parse(json.content)
     // preprocess inline-math
     body.querySelectorAll('inline-math').forEach((val) => {
         const latex = val.innerText;

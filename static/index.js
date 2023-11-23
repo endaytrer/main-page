@@ -1,3 +1,5 @@
+import wasm_init from "./modules/libmarkdown/libmarkdown.js"
+import { renderPost, apiUri } from './blog.js';
 
 const root = [
     {
@@ -625,12 +627,15 @@ async function load() {
     /**
      * Temporary box indicating
      */
+    
+
     const code = document.getElementById('console');
     const header = document.getElementById('header');
     const list =  document.getElementById('list');
     const url = new URL(window.location.href)
     const postName = url.hash.substring(1)
     if (postName) {
+        await wasm_init()
         const post = document.getElementById('post');
         code.classList.add('hidden');
         header.classList.add('hidden');
