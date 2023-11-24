@@ -87,7 +87,7 @@ def list():
     order_by = request.args['orderBy'] if "orderBy" in request.args and request.args["orderBy"] in BLOG_PROPERTY_LIST else "created"
     descent = "descent" in request.args
 
-    command = f"SELECT b.`id`, b.`title`, b.`reads`, b.`likes`, b.`created` FROM `blogs` b"
+    command = f"SELECT b.`id`, b.`title`, b.`reads`, b.`likes`, b.`created`, b.`last_modified` FROM `blogs` b"
     
     cursor_exec_args = ()
     if "tag" in request.args and request.args["tag"].isdigit():
@@ -101,7 +101,7 @@ def list():
     ans = cursor.fetchall()
     cursor.close()
     db.commit()
-    return json.dumps([{"id": i[0], "title": i[1], "reads": i[2], "likes": i[3], "created": i[4].isoformat()} for i in ans])
+    return json.dumps([{"id": i[0], "title": i[1], "reads": i[2], "likes": i[3], "created": i[4].isoformat(), "lastModified": i[5].isoformat()} for i in ans])
 
 @app.route("/tags/list")
 def tag_list():

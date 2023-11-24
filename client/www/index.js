@@ -769,21 +769,25 @@ async function loadBlogList() {
     postElement.innerText = summary.count
 
     // get blog list
-    const resp = await fetch(apiUri + 'blogs/list');
+    const resp = await fetch(apiUri + 'blogs/list?descent');
     const blogList = await resp.json();
     const titleList = list.querySelector('#title-list')
     titleList.innerHTML = '';
 
     for (let blog of blogList) {
-        const {id, title, reads, likes, created} = blog;
-        const date = new Date(created).toLocaleDateString();
+        const {id, title, reads, likes, created, lastModified} = blog;
+        let date = new Date(created).toLocaleDateString();
+        const modifiedDate = new Date(lastModified).toLocaleDateString();
+        if (date != modifiedDate) {
+            date = `${date} · modified at ${modifiedDate}`
+        }
 
         const link = document.createElement('a');
         link.className = "post-link";
         link.href = `#${id}`;
         link.innerHTML = `
             <h4 class="title">${title}</h4>
-            <p class="date">${date} · ${likes} likes · ${reads} views</p>
+            <p class="date">${date} · ${likes} likes · ${reads} reads</p>
         `
         titleList.appendChild(link);
     }
