@@ -3,8 +3,8 @@ blogs/*
 static/*.assets
 venv
 statistic.csv
-static/sites
-*.log
-libmarkdown/pkg
-libmarkdown/target
-libmarkdown/Cargo.lock
+sites
+data
+client/libmarkdown/pkg
+client/libmarkdown/target
+client/libmarkdown/Cargo.lock
