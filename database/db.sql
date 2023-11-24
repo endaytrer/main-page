@@ -1,6 +1,3 @@
-CREATE DATABASE IF NOT EXISTS `mainpage`;
-USE `mainpage`;
-
 CREATE TABLE IF NOT EXISTS `blogs` (
     `id` VARCHAR(255) NOT NULL,
     `title` VARCHAR(255),

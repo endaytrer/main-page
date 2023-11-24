@@ -14,20 +14,16 @@ for i in range(10):
         break
     except:
         if i == 9:
-            print("Cannot connect to database. Exit.", file=sys.stderr)
+            print("Cannot connect to database. Exit.", file=sys.stderr, flush=True)
             exit(1)
-        print("Unable to connect. Retry in 1s...\n")
+        print("Unable to connect. Retry in 1s...\n", flush=True)
         time.sleep(1)
         
-
-db.cursor()
-
 @app.route("/blogs/stat/<name>")
 def blog(name):
     cursor = db.cursor()
     cursor.execute("UPDATE `blogs` SET `reads` = `reads` + 1 WHERE `id` = %s", (name,))
     cursor.close()
-    db.commit()
     cursor = db.cursor()
     cursor.execute("""
         SELECT b.`title`, b.`license`, b.`likes`, b.`reads`, b.`created`, b.`last_modified`, t.`id`, t.`name` as tag FROM `blogs` b
@@ -37,6 +33,7 @@ def blog(name):
     """, (name,))
     ans = cursor.fetchall()
     cursor.close()
+    db.commit()
     print(ans)
     if len(ans) == 0:
         return json.dumps({"success": False, "error": "Cannot find blog"})
@@ -59,7 +56,6 @@ def blog(name):
 def like(name):
     cursor = db.cursor()
     cursor.execute("UPDATE `blogs` SET `likes` = `likes` + 1 WHERE `id` = %s", (name,))
-    cursor.fetchall()
     cursor.close()
     db.commit();
     return "OK"
@@ -68,7 +64,6 @@ def like(name):
 def unlike(name):
     cursor = db.cursor()
     cursor.execute("UPDATE `blogs` SET `likes` = `likes` - 1 WHERE `id` = %s", (name,))
-    cursor.fetchall()
     cursor.close()
     db.commit();
     return "OK"
@@ -82,6 +77,7 @@ def blog_count():
     cursor.execute("SELECT COUNT(*), SUM(`reads`), SUM(`likes`) FROM `blogs`");
     count, reads, likes = cursor.fetchone()
     cursor.close()
+    db.commit()
     return json.dumps({"count": int(count), "reads": int(reads), "likes": int(likes)})
 
 @app.route("/blogs/list")
@@ -104,6 +100,7 @@ def list():
     cursor.execute(command, cursor_exec_args)
     ans = cursor.fetchall()
     cursor.close()
+    db.commit()
     return json.dumps([{"id": i[0], "title": i[1], "reads": i[2], "likes": i[3], "created": i[4].isoformat()} for i in ans])
 
 @app.route("/tags/list")
