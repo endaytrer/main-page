@@ -8,10 +8,7 @@
 You need `make`, `docker-compose`, `cargo`, `wasm-pack` to build the system.
 
 ```bash
-mkdir -p client/www/modules
-(cd client && make all)
-mkdir -p blogs data sites
-docker compose up
+./deploy.sh
 ```
 
 First deployment may not be successful, since MySQL need to set up things with time exceeding 10s, which is the limit for database connection.

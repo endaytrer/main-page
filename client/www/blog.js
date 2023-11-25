@@ -30,7 +30,7 @@ export async function renderPost(postName) {
     const like = document.getElementById('like-number')
     const icon = document.getElementById('heart-icon')
     document.querySelector("#like-button").addEventListener('click', handleClick)
-    const content = await(await fetch('blogs/' + postName)).text();
+    const content = await(await fetch('/blogs/' + postName)).text();
     const resp = await fetch(apiUri + 'blogs/stat/' + postName);
     const json = await resp.json();
     button.setAttribute("name", postName);

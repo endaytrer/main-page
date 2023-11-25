@@ -1,10 +1,7 @@
 __pycache__
 blogs/*
-static/*.assets
-venv
-statistic.csv
-sites
-data
+sites/*
+data/*
 client/libmarkdown/pkg
 client/libmarkdown/target
 client/libmarkdown/Cargo.lock

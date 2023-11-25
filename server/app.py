@@ -4,27 +4,43 @@ import os
 import time
 from flask import Flask, request
 import MySQLdb
-import datetime
+from typing import Optional
 
 app = Flask(__name__)
 
-for i in range(10):
-    try:
-        db: MySQLdb.Connection = MySQLdb.connect(host=os.environ["MYSQL_HOST"], port=int(os.environ["MYSQL_PORT"]), user=os.environ["MYSQL_USER"], password=os.environ["MYSQL_PASSWORD"], database=os.environ["MYSQL_DATABASE"], connect_timeout=3)
-        break
-    except:
-        if i == 9:
-            print("Cannot connect to database. Exit.", file=sys.stderr, flush=True)
-            exit(1)
-        print("Unable to connect. Retry in 1s...\n", flush=True)
-        time.sleep(1)
+
+db: Optional[MySQLdb.Connection] = None
+
+def acquire_db() -> MySQLdb.Connection:
+    global db
+    active = db is not None and db.ping(True)
+    
+    if active:
+        return db
+    
+    if db is not None:
+        db.close()
+
+    for i in range(10):
+        try:
+            conn: MySQLdb.Connection = MySQLdb.connect(host=os.environ["MYSQL_HOST"], port=int(os.environ["MYSQL_PORT"]), user=os.environ["MYSQL_USER"], password=os.environ["MYSQL_PASSWORD"], database=os.environ["MYSQL_DATABASE"])
+            break
+        except:
+            if i == 9:
+                print("Cannot connect to database. Exit.", file=sys.stderr, flush=True)
+                exit(1)
+            print("Unable to connect. Retry in 1s...\n", flush=True)
+            time.sleep(1)
+    return conn
+            
         
 @app.route("/blogs/stat/<name>")
 def blog(name):
-    cursor = db.cursor()
+    conn = acquire_db()
+    cursor = conn.cursor()
     cursor.execute("UPDATE `blogs` SET `reads` = `reads` + 1 WHERE `id` = %s", (name,))
     cursor.close()
-    cursor = db.cursor()
+    cursor = conn.cursor()
     cursor.execute("""
         SELECT b.`title`, b.`license`, b.`likes`, b.`reads`, b.`created`, b.`last_modified`, t.`id`, t.`name` as tag FROM `blogs` b
         LEFT JOIN `blog_tag` bt ON b.`id` = bt.`blog_id`
@@ -33,7 +49,7 @@ def blog(name):
     """, (name,))
     ans = cursor.fetchall()
     cursor.close()
-    db.commit()
+    conn.commit()
     print(ans)
     if len(ans) == 0:
         return json.dumps({"success": False, "error": "Cannot find blog"})
@@ -54,34 +70,37 @@ def blog(name):
 
 @app.route("/blogs/like/<name>")
 def like(name):
-    cursor = db.cursor()
+    conn = acquire_db()
+    cursor = conn.cursor()
     cursor.execute("UPDATE `blogs` SET `likes` = `likes` + 1 WHERE `id` = %s", (name,))
     cursor.close()
-    db.commit();
+    conn.commit();
     return "OK"
 
 @app.route("/blogs/unlike/<name>")
 def unlike(name):
-    cursor = db.cursor()
+    conn = acquire_db()
+    cursor = conn.cursor()
     cursor.execute("UPDATE `blogs` SET `likes` = `likes` - 1 WHERE `id` = %s", (name,))
     cursor.close()
-    db.commit();
+    conn.commit();
     return "OK"
 
 BLOG_PROPERTY_LIST = ["id", "title", "license", "likes", "reads", "created", "last_modified"]   
 
 @app.route("/blogs/count")
 def blog_count():
-    
-    cursor = db.cursor()
+    conn = acquire_db()
+    cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*), SUM(`reads`), SUM(`likes`) FROM `blogs`");
     count, reads, likes = cursor.fetchone()
     cursor.close()
-    db.commit()
+    conn.commit()
     return json.dumps({"count": int(count), "reads": int(reads), "likes": int(likes)})
 
 @app.route("/blogs/list")
 def list():
+    conn = acquire_db()
     page = int(request.args["page"]) if "page" in request.args and request.args["page"].isdigit() else 0
     limit = int(request.args["limit"]) if "limit" in request.args and request.args["limit"].isdigit() else 10
     order_by = request.args['orderBy'] if "orderBy" in request.args and request.args["orderBy"] in BLOG_PROPERTY_LIST else "created"
@@ -96,16 +115,17 @@ def list():
     command += f" ORDER BY `{order_by}` {'DESC' if descent else 'ASC'} LIMIT {limit} OFFSET {page * limit}"
 
     print(command)
-    cursor = db.cursor()
+    cursor = conn.cursor()
     cursor.execute(command, cursor_exec_args)
     ans = cursor.fetchall()
     cursor.close()
-    db.commit()
+    conn.commit()
     return json.dumps([{"id": i[0], "title": i[1], "reads": i[2], "likes": i[3], "created": i[4].isoformat(), "lastModified": i[5].isoformat()} for i in ans])
 
 @app.route("/tags/list")
 def tag_list():
-    cursor = db.cursor()
+    conn = acquire_db()
+    cursor = conn.cursor()
     cursor.execute("SELECT `id`, `name` FROM `tags`");
     ans = cursor.fetchall()
     cursor.close()

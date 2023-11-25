@@ -7,10 +7,7 @@ TARGETS := $(patsubst %, $(STATIC)/modules/%, $(WASM_LIBS))
 
 LIBMARKDOWN_SRC := $(wildcard $(LIBMARKDOWN)/src/*.rs)
 
-.PHONY: dockerimage all clean 
-
-dockerimage: $(TARGETS)
-	docker build . --tag endaytrer/main-page-client
+.PHONY: all clean 
 
 all: $(TARGETS)
 
