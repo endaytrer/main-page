@@ -6,7 +6,6 @@ services:
     volumes:
       - ./blogs:/var/www/blogs
       - ./sites:/var/www/sites
-      - ./client/www:/var/www/devel
     depends_on:
       - server
 

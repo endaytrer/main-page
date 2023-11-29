@@ -3,7 +3,7 @@ use syntect::parsing::SyntaxSet;
 use syntect::highlighting::{ThemeSet, Theme};
 use syntect::html::highlighted_html_for_string;
 use wasm_bindgen::prelude::*;
-use pulldown_cmark::{Parser, Options, html, Event, Tag, CowStr};
+use pulldown_cmark::{Parser, Options, html, Event, Tag, TagEnd, CowStr};
 #[wasm_bindgen]
 extern {
     pub fn alert(s: &str);
@@ -54,7 +54,7 @@ fn highlight<'a, It: Iterator<Item = Event<'a>>>(syntax_set: &SyntaxSet, theme: 
                 };
                 in_code_block = true;
             },
-            Event::End(Tag::CodeBlock(_)) => {
+            Event::End(TagEnd::CodeBlock) => {
                 let mut html = String::from(format!("<div class=\"pre-wrapper\" lang=\"{}\">", &lang.unwrap()));
                 html.push_str(&highlighted_html_for_string(&to_highlight, syntax_set, syntax, theme).unwrap());
                 html.push_str("</div>");
