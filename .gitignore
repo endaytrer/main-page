@@ -5,3 +5,4 @@ data/*
 client/libmarkdown/pkg
 client/libmarkdown/target
 client/libmarkdown/Cargo.lock
+mainpage.log
