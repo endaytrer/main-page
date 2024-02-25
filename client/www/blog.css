@@ -17,10 +17,17 @@
     margin: 10px 0;
 }
 .post-link h4 {
+    display: flex;
+    align-items: center;
     font-weight: 500;
     font-size: 1.2rem;
     margin: 10px 0 4px;
     color: var(--dark);
+}
+.post-link h4 i {
+    color: var(--secondary);
+    font-size: 0.7rem;
+    margin-left: 8px;
 }
 .post-link p {
     font-size: 0.8rem;
@@ -145,4 +152,54 @@
     font-size: 1.6rem;
     color: white;
     font-family: "Raleway", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+#password-input input[type="password"] {
+    outline: none;
+    border: none;
+    padding: 6px 4px;
+    border-radius: 6px;
+    color: var(--secondary);
+    border: 2px solid transparent;
+    transition: border 100ms ease-out;
+}
+#password-input input[type="password"]:focus {
+    border: 2px solid var(--accent);
+}
+#password-input input[type="submit"] {
+    cursor: pointer;
+    border: none;
+    outline: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background-color: var(--accent);
+    color: var(--light);
+}
+
+#post-info {
+    font-weight: bold;
+    padding: 20px 0 0px;
+    font-size: 0.8rem;
+    color: var(--secondary);
+}
+#post-info .separator {
+    margin: 0 6px;
+}
+#post-info .license {
+    color: var(--primary);
+    text-decoration: none;
+}
+#post-info .license > i {
+    margin-right: 3px;
+}
+#post-info .tag {
+    background-color: var(--secondary);
+    padding: 2px 8px;
+    color: var(--light);
+    border-radius: 99px;
+    text-decoration: none;
+    
+}
+#post-info .tag::before {
+    content: "# ";
 }

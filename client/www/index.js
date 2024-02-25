@@ -619,10 +619,10 @@ function handleInput(key, target) {
     }
 }
 function acknowledge_notification() {
-    console.log("ack")
     notification.classList.add('hidden');
     localStorage.setItem('acknowledged', Date.now());
 }
+let currentPage = 0;
 async function load() {
     /**
      * Temporary box indicating
@@ -647,6 +647,7 @@ async function load() {
         await renderPost(postName);
         return;
     }
+    document.getElementById("blog-title").innerText = "Daniel Gu's Blog";
     document.getElementById('notification-acknowledge').addEventListener('click', acknowledge_notification);
     if (!localStorage.getItem('acknowledged')) {
         notification.classList.remove('hidden')
@@ -755,10 +756,11 @@ async function load() {
             handleInput(e.key, command);
         }
     }
-    loadBlogList();
+    loadBlogList(currentPage);
     output(command);
 }
-async function loadBlogList() {
+const PAGE_LIMIT=10
+async function loadBlogList(page) {
     // get total count, reads, likes
     const summary = await (await fetch(apiUri + 'blogs/count')).json()
     const readElement = document.getElementById("read-count")
@@ -769,13 +771,13 @@ async function loadBlogList() {
     postElement.innerText = summary.count
 
     // get blog list
-    const resp = await fetch(apiUri + 'blogs/list?descent');
+    const resp = await fetch(apiUri + `blogs/list?limit=${PAGE_LIMIT}&page=${page}&descent`);
     const blogList = await resp.json();
     const titleList = list.querySelector('#title-list')
     titleList.innerHTML = '';
 
     for (let blog of blogList) {
-        const {id, title, reads, likes, created, lastModified} = blog;
+        const {id, title, reads, likes, created, lastModified, needPassword} = blog;
         let date = new Date(created).toLocaleDateString();
         const modifiedDate = new Date(lastModified).toLocaleDateString();
         if (date != modifiedDate) {
@@ -786,12 +788,48 @@ async function loadBlogList() {
         link.className = "post-link";
         link.href = `#${id}`;
         link.innerHTML = `
-            <h4 class="title">${title}</h4>
+            <h4 class="title">${title}${needPassword ? '<i class="fa-solid fa-lock"></i>': ""}</h4>
             <p class="date">${date} · ${likes} likes · ${reads} reads</p>
         `
         titleList.appendChild(link);
     }
+    // set page buttons
+    const paging = document.getElementById("paging");
+    paging.innerHTML = "";
 
+    const num_posts = parseInt(summary.count);
+    const num_pages = Math.ceil(num_posts / PAGE_LIMIT);
+    if (num_pages > 1) {
+        // previous
+        const previousButton = document.createElement("button");
+        previousButton.classList.add("page-button");
+        previousButton.innerHTML = "<span>&lsaquo;</span><span>Previous</span>"
+        if (page === 0) {
+            previousButton.disabled = true;
+        }
+        previousButton.onclick = () => loadBlogList(page - 1);
+        paging.appendChild(previousButton);
+
+        for (let i = 0; i < num_pages; i++) {
+            const pageButton = document.createElement("button");
+            pageButton.classList.add("page-button");
+            pageButton.classList.add("number");
+            if (i === page) pageButton.classList.add("active");
+            pageButton.innerHTML = i + 1;
+            pageButton.onclick = () => loadBlogList(i);
+            paging.appendChild(pageButton);
+        }
+
+        // next
+        const nextButton = document.createElement("button");
+        nextButton.classList.add("page-button");
+        nextButton.innerHTML = "<span>Next</span><span>&rsaquo;</span>"
+        if (page === num_pages - 1) {
+            nextButton.disabled = true;
+        }
+        nextButton.onclick = () => loadBlogList(page + 1);
+        paging.appendChild(nextButton);
+    }
 }
 window.addEventListener('load', load)
 window.addEventListener('hashchange', load)

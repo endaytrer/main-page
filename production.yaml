@@ -17,6 +17,8 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=secret
       - MYSQL_DATABASE=mainpage
+    volumes:
+      - ./secret_blogs:/var/secret_blogs
     depends_on:
       - mysql
   
@@ -24,6 +26,7 @@ services:
     build: uploader
     volumes:
       - ./blogs:/var/blogs
+      - ./secret_blogs:/var/secret_blogs
     environment:
       - MYSQL_HOST=mysql
       - MYSQL_PORT=3306

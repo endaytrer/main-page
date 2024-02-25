@@ -1,5 +1,6 @@
 __pycache__
 blogs/*
+secret_blogs/*
 sites/*
 data/*
 client/libmarkdown/pkg

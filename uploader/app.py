@@ -16,6 +16,8 @@ STARTUPS = [
     `reads` INT DEFAULT 0,
     `created` DATETIME,
     `last_modified` DATETIME,
+    `password` VARCHAR(255),
+    `hint` VARCHAR(255),
     PRIMARY KEY (`id`)
 );""",
 """CREATE TABLE IF NOT EXISTS `tags` (
@@ -28,7 +30,7 @@ STARTUPS = [
     `tag_id` INT NOT NULL,
     FOREIGN KEY (`blog_id`) REFERENCES `blogs` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
-);"""
+);""",
 ]
 
 db: Optional[MySQLdb.Connection] = None
@@ -56,8 +58,9 @@ def acquire_db() -> MySQLdb.Connection:
             time.sleep(1)
     return conn
 
+# In uploader, every blog placed in both places can be either secret or public. server and client are responsible to keep blogs in secret_blogs secret.
+BLOG_DIRS = ["/var/blogs", "/var/secret_blogs"]
 
-BLOG_DIR = "/var/blogs"
 # test if tables are created
 conn = acquire_db()
 cursor: MySQLdb.cursors.Cursor = conn.cursor()
@@ -65,7 +68,7 @@ cursor.execute("SHOW TABLES")
 ans = cursor.fetchall()
 cursor.close()
 
-if len(ans) == 0:
+if len(ans) < len(STARTUPS):
     for command in STARTUPS:
         cursor: MySQLdb.cursors.Cursor = conn.cursor()
         cursor.execute(command)
@@ -110,7 +113,7 @@ cursor.close()
 blog_hashes: dict[str, datetime.datetime] = {i[0]: i[1] for i in ans}
 
 
-Blog = NamedTuple("Blog", [('id', str), ('title', str), ("license", str), ("likes", int), ("reads", int), ("created", datetime.datetime), ("last_modified", datetime.datetime), ("tag_names", list[str])])
+Blog = NamedTuple("Blog", [('id', str), ('title', str), ("license", str), ("likes", int), ("reads", int), ("created", datetime.datetime), ("last_modified", datetime.datetime), ("tag_names", list[str]), ("password", Optional[str]), ("hint", Optional[str])])
 
 delta_insert: list[Blog] = []
 delta_update: list[Blog] = []
@@ -122,6 +125,8 @@ delta_update: list[Blog] = []
 SCAN_LINES = 10
 TITLE_REGEX = re.compile(r"^#\s(.*?)$")
 LICENSE_REGEX = re.compile(r"^>\s+License:\s*(.*?)$")
+PASSWORD_REGEX = re.compile(r"^>\s+Password:\s*(.*?)$")
+HINT_REGEX = re.compile(r"^>\s+Hint:\s*(.*?)$")
 TAG_REGEX = re.compile(r"^>\s+Tags:\s*([^\s][^,]*(,\s*[^\s][^,]*)*),?$")
 def parse_markdown(filename: str, path: str, stat: os.stat_result) -> Blog:
     global old_tag_names
@@ -133,7 +138,8 @@ def parse_markdown(filename: str, path: str, stat: os.stat_result) -> Blog:
     title = None
     license = None
     post_tag_names: Optional[list[str]] = None
-    # TODO: add tags support
+    password: Optional[str] = None
+    hint: Optional[str] = None
     with open(path, "r") as f:
         for _ in range(SCAN_LINES):
             line = f.readline().strip()
@@ -149,6 +155,14 @@ def parse_markdown(filename: str, path: str, stat: os.stat_result) -> Blog:
                 match = TAG_REGEX.fullmatch(line)
                 if match is not None:
                     post_tag_names = [s.strip() for s in match.groups()[0].split(",")]
+            if password is None:
+                match = PASSWORD_REGEX.fullmatch(line)
+                if match is not None:
+                    password = match.groups()[0]
+            if hint is None:
+                match = HINT_REGEX.fullmatch(line)
+                if match is not None:
+                    hint = match.groups()[0]
     if post_tag_names is None:
         post_tag_names = []
     else:
@@ -156,25 +170,26 @@ def parse_markdown(filename: str, path: str, stat: os.stat_result) -> Blog:
             if tag not in old_tag_names and tag not in new_tag_names:
                 new_tag_names.add(tag)
             
-    
-    return Blog(id, title, license, 0, 0, created, last_modified, post_tag_names)
+    return Blog(id, title, license, 0, 0, created, last_modified, post_tag_names, password, hint)
 
 def update_hash():
     global new_tag_names
-    global old_tag_names 
-    posts = os.listdir(BLOG_DIR)
+    global old_tag_names
+    # second argument is the prefix.
+    posts: list[tuple[str, str]] = [(i, prefix) for prefix in BLOG_DIRS for i in os.listdir(prefix)]
+
     new_tag_names = set()
     delta_insert: list[Blog] = []
     delta_update: list[Blog] = []
     delta_delete: set[str] = set(blog_hashes.keys())
 
-    for post in posts:
+    for (post, prefix) in posts:
         if not post.endswith(".md"):
             continue
         if post in delta_delete:
             delta_delete.remove(post)
 
-        path = os.path.join(BLOG_DIR, post)
+        path = os.path.join(prefix, post)
         if not os.path.isfile(path):
             continue
 
@@ -206,9 +221,9 @@ def update_hash():
         
     cursor: MySQLdb.cursors.Cursor = conn.cursor()
     cursor.executemany("""
-        INSERT INTO `blogs` (`id`, `title`, `license`, `created`, `last_modified`) VALUES
-        (%s, %s, %s, %s, %s)
-        """, [(row.id, row.title, row.license, row.created, row.last_modified) for row in delta_insert]
+        INSERT INTO `blogs` (`id`, `title`, `license`, `created`, `last_modified`, `password`, `hint`) VALUES
+        (%s, %s, %s, %s, %s, %s, %s)
+        """, [(row.id, row.title, row.license, row.created, row.last_modified, row.password, row.hint) for row in delta_insert]
     )
     cursor.close()
     # Also, insert tags and update reference count
@@ -227,9 +242,9 @@ def update_hash():
     cursor: MySQLdb.cursors.Cursor = conn.cursor()
     cursor.executemany("""
         UPDATE `blogs`
-        SET `title` = %s, `license` = %s, `created` = %s, `last_modified` = %s
+        SET `title` = %s, `license` = %s, `created` = %s, `last_modified` = %s, `password` = %s, `hint` = %s
         WHERE `id` = %s
-        """, [(row.title, row.license, row.created, row.last_modified, row.id) for row in delta_update])
+        """, [(row.title, row.license, row.created, row.last_modified, row.password, row.hint, row.id) for row in delta_update])
     cursor.close()
 
     # update tags by removing old tags and creating new tags

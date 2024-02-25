@@ -38,7 +38,7 @@
         </div>
     </div>
     <div class="container top">
-        <h1 id="header" class="hidden"><a href="#">‹</a>Daniel Gu's Blog</h1>
+        <h1 id="header" class="hidden"><a href="#">‹</a><span id="blog-title">Daniel Gu's Blog</span></h1>
         <code id="console" class="hidden">
             <div class="padder"></div>
             <label for="fake-input">
@@ -78,7 +78,12 @@
                 </div>
                 <div class="list-main">
                     <h2 class="list-head">Recent Posts</h2>
-                    <div id="title-list"></div>
+                    <div>
+                        <div id="title-list"></div>
+                        <div id="paging">
+                            
+                        </div>
+                    </div>
                     <h2 class="list-head">Links</h2>
                     <div class="link-list">
                         <a href="https://jiaangk.github.io">Zhizhen Chen's Blog</a>
@@ -87,6 +92,16 @@
                 </div>
             </div>
             <div id="post" class="hidden">
+                <div id="post-info"></div>
+                <div id="password-input" class="hidden">
+                    <h3>Password needed</h3>
+                    <p id="password-hint-box">Hint: <span id="password-hint"></span></p>
+                    <form id="password-form" action="/api/blogs/content">
+                        <input id="password-input-id" name="id" type="text" hidden>
+                        <input name="password" type="password">
+                        <input type="submit" value="Unlock">
+                    </form>
+                </div>
                 <div id="markdown-body" class="markdown-body"></div>
                 <div class="control">
                     <div class="control-left">

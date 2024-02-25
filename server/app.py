@@ -2,6 +2,7 @@ import json
 import sys
 import os
 import time
+import re
 from flask import Flask, request
 import MySQLdb
 from typing import Optional
@@ -42,7 +43,7 @@ def blog(name):
     cursor.close()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT b.`title`, b.`license`, b.`likes`, b.`reads`, b.`created`, b.`last_modified`, t.`id`, t.`name` as tag FROM `blogs` b
+        SELECT b.`title`, b.`license`, b.`likes`, b.`reads`, b.`created`, b.`last_modified`, b.`password` IS NOT NULL, b.`hint`, t.`id`, t.`name` as tag FROM `blogs` b
         LEFT JOIN `blog_tag` bt ON b.`id` = bt.`blog_id`
         LEFT JOIN `tags` t ON bt.`tag_id` = t.`id`
         WHERE b.`id` = %s
@@ -60,10 +61,12 @@ def blog(name):
         "reads": ans[0][3],
         "created": ans[0][4].isoformat(),
         "last_modified": ans[0][5].isoformat(),
+        "need_password": bool(ans[0][6]),
+        "hint": ans[0][7],
         "tags": []
     }
-    if ans[0][6] != None:
-        fetch_result["tags"] = [{"id": i[6], "name": i[7]} for i in ans]
+    if ans[0][8] != None:
+        fetch_result["tags"] = [{"id": i[8], "name": i[9]} for i in ans]
     return json.dumps(fetch_result)
 
 
@@ -106,12 +109,20 @@ def list():
     order_by = request.args['orderBy'] if "orderBy" in request.args and request.args["orderBy"] in BLOG_PROPERTY_LIST else "created"
     descent = "descent" in request.args
 
-    command = f"SELECT b.`id`, b.`title`, b.`reads`, b.`likes`, b.`created`, b.`last_modified` FROM `blogs` b"
+    command = f"SELECT b.`id`, b.`title`, b.`reads`, b.`likes`, b.`created`, b.`last_modified`, b.`password` IS NOT NULL FROM `blogs` b"
     
     cursor_exec_args = ()
     if "tag" in request.args and request.args["tag"].isdigit():
         command += " INNER JOIN `blog_tag` bt ON b.`id` = bt.`blog_id` WHERE bt.`tag_id` = %s"
         cursor_exec_args = (int(request.args["tag"]),)
+    
+    # filter by password requirement
+    if "need_password" in request.args and request.args["need_password"] in ["true", "false"]:
+        if request.args["need_password"] == "true":
+            command += " WHERE b.`password` IS NOT NULL"
+        else:
+            command += " WHERE b.`password` IS NULL"
+
     command += f" ORDER BY `{order_by}` {'DESC' if descent else 'ASC'} LIMIT {limit} OFFSET {page * limit}"
 
     print(command)
@@ -120,7 +131,7 @@ def list():
     ans = cursor.fetchall()
     cursor.close()
     conn.commit()
-    return json.dumps([{"id": i[0], "title": i[1], "reads": i[2], "likes": i[3], "created": i[4].isoformat(), "lastModified": i[5].isoformat()} for i in ans])
+    return json.dumps([{"id": i[0], "title": i[1], "reads": i[2], "likes": i[3], "created": i[4].isoformat(), "lastModified": i[5].isoformat(), "needPassword": bool(i[6])} for i in ans])
 
 @app.route("/tags/list")
 def tag_list():
@@ -131,5 +142,45 @@ def tag_list():
     cursor.close()
     fetched_results = [{ "id": i[0], "name": i[1] } for i in ans];
     return json.dumps(fetched_results)
+
+SCAN_LINES = 10
+PASSWORD_REGEX = re.compile(r"^>\s+Password:\s*(.*?)$")
+HINT_REGEX = re.compile(r"^>\s+Hint:\s*(.*?)$")
+
+SECRET_BLOG_DIR = "/var/secret_blogs"
+"""
+get content of a blog
+"""
+@app.route("/blogs/content")
+def get_content():
+    if "id" not in request.args or "password" not in request.args:
+        return "illegal parameters", 403
+
+    conn = acquire_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT `id` FROM `blogs` WHERE `id` = %s AND `password` = %s", (request.args["id"], request.args["password"]))
+    ans = cursor.fetchall()
+    cursor.close()
+    print(ans)
+    if len(ans) != 1 or ans[0][0] != request.args["id"]:
+        return "forbidden", 403
+    
+    path = os.path.join(SECRET_BLOG_DIR, request.args["id"])
+    try:
+        fd = open(path, "r")
+        content = ""
+        for _ in range(SCAN_LINES):
+            line = fd.readline()
+            stripped_line = line.strip()
+            if PASSWORD_REGEX.match(stripped_line) is None and HINT_REGEX.match(stripped_line) is None:
+                content += line
+        
+        content += fd.read()
+        return content
+
+    except:
+        return "cannot read", 403
+    finally:
+        fd.close()
 
 app.run(host="0.0.0.0", port=80)

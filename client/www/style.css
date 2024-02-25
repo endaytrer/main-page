@@ -302,7 +302,8 @@ body {
 }
 #list.hidden,
 #post.hidden,
-#notification.hidden {
+#notification.hidden,
+#password-input.hidden {
     display: none;
 }
 
@@ -527,4 +528,32 @@ footer small {
 }
 footer a {
     color: inherit;
+}
+#paging {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+#paging .page-button {
+    cursor: pointer;
+    background: none;
+    border: none;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 2px;
+}
+#paging .page-button.number {
+    width: 24px;
+    height: 24px;
+    border-radius: 99px;
+}
+#paging .page-button span {
+    display: block;
+    margin: 0 4px;
+}
+#paging .page-button.active {
+    background-color: var(--accent);
+    color: var(--light);
 }

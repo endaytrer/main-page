@@ -1,0 +1,1 @@
+docker exec main-page-mysql-1 mysql -uroot -psecret mainpage -e 'ALTER TABLE `blogs` ADD `password` VARCHAR(255), ADD `hint` VARCHAR(255);'
