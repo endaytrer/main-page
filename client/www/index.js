@@ -649,9 +649,9 @@ async function load() {
     }
     document.getElementById("blog-title").innerText = "Daniel Gu's Blog";
     document.getElementById('notification-acknowledge').addEventListener('click', acknowledge_notification);
-    if (!localStorage.getItem('acknowledged')) {
-        notification.classList.remove('hidden')
-    }
+    // if (!localStorage.getItem('acknowledged')) {
+    //     notification.classList.remove('hidden')
+    // }
     code.classList.remove('hidden');
     header.classList.remove('hidden');
     list.classList.remove('hidden')
