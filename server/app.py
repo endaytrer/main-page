@@ -8,6 +8,7 @@ import sqlite3
 import datetime
 from typing import Optional
 
+port = int(sys.argv[1])
 
 db: Optional[sqlite3.Connection] = None
 
@@ -196,4 +197,4 @@ def get_content():
     finally:
         fd.close()
 
-app.run(host="0.0.0.0", port=80)
+app.run(host="127.0.0.1", port=port)

@@ -8,3 +8,4 @@ client/libmarkdown/target
 mainpage.log
 blogs.db
 */**/.DS_Store
+tmp
