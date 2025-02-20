@@ -3,39 +3,37 @@ import os
 import sys
 import time
 import datetime
-import MySQLdb
+import sqlite3
 from typing import NamedTuple, Optional
 
 
 STARTUPS = [
 """CREATE TABLE IF NOT EXISTS `blogs` (
-    `id` VARCHAR(255) NOT NULL,
-    `title` VARCHAR(255),
-    `license` VARCHAR(255),
-    `likes` INT DEFAULT 0,
-    `reads` INT DEFAULT 0,
-    `created` DATETIME,
-    `last_modified` DATETIME,
-    `password` VARCHAR(255),
-    `hint` VARCHAR(255),
-    PRIMARY KEY (`id`)
+    `id` TEXT NOT NULL PRIMARY KEY,
+    `title` TEXT,
+    `license` TEXT,
+    `likes` INTEGER DEFAULT 0,
+    `reads` INTEGER DEFAULT 0,
+    `created` TIMESTAMP,
+    `last_modified` TIMESTAMP,
+    `password` TEXT,
+    `hint` TEXT
 );""",
 """CREATE TABLE IF NOT EXISTS `tags` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(255) NOT NULL,
-    PRIMARY KEY(`id`)
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+    `name` TEXT NOT NULL
 );""",
 """CREATE TABLE IF NOT EXISTS `blog_tag` (
-    `blog_id` VARCHAR(255) NOT NULL,
-    `tag_id` INT NOT NULL,
+    `blog_id` TEXT NOT NULL,
+    `tag_id` INTEGER NOT NULL,
     FOREIGN KEY (`blog_id`) REFERENCES `blogs` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
     FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 );""",
 ]
 
-db: Optional[MySQLdb.Connection] = None
+db: Optional[sqlite3.Connection] = None
 
-def acquire_db() -> MySQLdb.Connection:
+def acquire_db() -> sqlite3.Connection:
     global db
     active = db is not None and db.ping(True)
     
@@ -48,7 +46,7 @@ def acquire_db() -> MySQLdb.Connection:
         try:
             if db is not None:
                 db.close()
-            conn: MySQLdb.Connection = MySQLdb.connect(host=os.environ["MYSQL_HOST"], port=int(os.environ["MYSQL_PORT"]), user=os.environ["MYSQL_USER"], password=os.environ["MYSQL_PASSWORD"], database=os.environ["MYSQL_DATABASE"])
+            conn: sqlite3.Connection = sqlite3.connect("blogs.db")
             break
         except:
             if i == 9:
@@ -59,18 +57,18 @@ def acquire_db() -> MySQLdb.Connection:
     return conn
 
 # In uploader, every blog placed in both places can be either secret or public. server and client are responsible to keep blogs in secret_blogs secret.
-BLOG_DIRS = ["/var/blogs", "/var/secret_blogs"]
+BLOG_DIRS = ["blogs", "secret_blogs"]
 
 # test if tables are created
 conn = acquire_db()
-cursor: MySQLdb.cursors.Cursor = conn.cursor()
-cursor.execute("SHOW TABLES")
+cursor: sqlite3.Cursor = conn.cursor()
+cursor.execute("SELECT name FROM sqlite_temp_master WHERE type='table'")
 ans = cursor.fetchall()
 cursor.close()
 
 if len(ans) < len(STARTUPS):
     for command in STARTUPS:
-        cursor: MySQLdb.cursors.Cursor = conn.cursor()
+        cursor: sqlite3.Cursor = conn.cursor()
         cursor.execute(command)
         cursor.close()
     conn.commit()
@@ -85,7 +83,7 @@ class Tag:
         self.name = name
         self.rc = rc
 
-cursor: MySQLdb.cursors.Cursor = conn.cursor()
+cursor: sqlite3.Cursor = conn.cursor()
 cursor.execute("SELECT * FROM `tags`")
 ans = cursor.fetchall()
 cursor.close()
@@ -93,7 +91,7 @@ cursor.close()
 tags: dict[int, Tag] = {int(i[0]): Tag(i[1], 0) for i in ans}
 tags_mapping = {tags[t].name: t for t in tags}
 
-cursor: MySQLdb.cursors.Cursor = conn.cursor()
+cursor: sqlite3.Cursor = conn.cursor()
 cursor.execute("SELECT `tag_id`, COUNT(*) FROM `blog_tag` GROUP BY `tag_id`")
 ans = cursor.fetchall()
 cursor.close()
@@ -106,7 +104,7 @@ old_tag_names = {tags[i].name for i in tags}
 new_tag_names: set[str] = set()
 
 
-cursor: MySQLdb.cursors.Cursor = conn.cursor()
+cursor: sqlite3.Cursor = conn.cursor()
 cursor.execute("SELECT `id`, `last_modified` FROM `blogs`")
 ans = cursor.fetchall()
 cursor.close()
@@ -204,14 +202,14 @@ def update_hash():
 
     conn = acquire_db()
     # insert tags and acquire tag id
-    cursor: MySQLdb.cursors.Cursor = conn.cursor()
-    cursor.executemany("INSERT INTO `tags` (`name`) VALUES (%s)", [(t,) for t in new_tag_names])
+    cursor: sqlite3.Cursor = conn.cursor()
+    cursor.executemany("INSERT INTO `tags` (`name`) VALUES (?)", [(t,) for t in new_tag_names])
     cursor.close()
 
     # acquire tag id
     for t in new_tag_names:
-        cursor: MySQLdb.cursors.Cursor = conn.cursor()
-        cursor.execute("SELECT `id` FROM `tags` WHERE `name` = %s", (t,))
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.execute("SELECT `id` FROM `tags` WHERE `name` = ?", (t,))
         id, = cursor.fetchone()
         cursor.close()
 
@@ -219,18 +217,18 @@ def update_hash():
         tags_mapping[t] = id
     
         
-    cursor: MySQLdb.cursors.Cursor = conn.cursor()
+    cursor: sqlite3.Cursor = conn.cursor()
     cursor.executemany("""
         INSERT INTO `blogs` (`id`, `title`, `license`, `created`, `last_modified`, `password`, `hint`) VALUES
-        (%s, %s, %s, %s, %s, %s, %s)
-        """, [(row.id, row.title, row.license, row.created, row.last_modified, row.password, row.hint) for row in delta_insert]
+        (?, ?, ?, ?, ?, ?, ?)
+        """, [(row.id, row.title, row.license, int(row.created.timestamp()), int(row.last_modified.timestamp()), row.password, row.hint) for row in delta_insert]
     )
     cursor.close()
     # Also, insert tags and update reference count
     for row in delta_insert:
-        cursor: MySQLdb.cursors.Cursor = conn.cursor()
+        cursor: sqlite3.Cursor = conn.cursor()
         cursor.executemany("""
-        INSERT INTO `blog_tag` (`blog_id`, `tag_id`) VALUES (%s, %s)
+        INSERT INTO `blog_tag` (`blog_id`, `tag_id`) VALUES (?, ?)
         """, [(row.id, tags_mapping[t]) for t in row.tag_names])
         
         for tag_name in row.tag_names:
@@ -239,31 +237,31 @@ def update_hash():
 
         cursor.close()
 
-    cursor: MySQLdb.cursors.Cursor = conn.cursor()
+    cursor: sqlite3.Cursor = conn.cursor()
     cursor.executemany("""
         UPDATE `blogs`
-        SET `title` = %s, `license` = %s, `created` = %s, `last_modified` = %s, `password` = %s, `hint` = %s
-        WHERE `id` = %s
+        SET `title` = ?, `license` = ?, `created` = ?, `last_modified` = ?, `password` = ?, `hint` = ?
+        WHERE `id` = ?
         """, [(row.title, row.license, row.created, row.last_modified, row.password, row.hint, row.id) for row in delta_update])
     cursor.close()
 
     # update tags by removing old tags and creating new tags
     for row in delta_update:
-        cursor: MySQLdb.cursors.Cursor = conn.cursor()
-        cursor.execute("SELECT `tag_id`, COUNT(*) FROM `blog_tag` WHERE `blog_id` = %s GROUP BY `tag_id`", (row.id, ))
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.execute("SELECT `tag_id`, COUNT(*) FROM `blog_tag` WHERE `blog_id` = ? GROUP BY `tag_id`", (row.id, ))
         ans = cursor.fetchall()
         cursor.close()
 
 
-        cursor: MySQLdb.cursors.Cursor = conn.cursor()
-        cursor.execute("DELETE FROM `blog_tag` WHERE `blog_id` = %s", (row.id, ))
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.execute("DELETE FROM `blog_tag` WHERE `blog_id` = ?", (row.id, ))
         cursor.close()
 
         for id, count in ans:
             tags[id].rc -= count
 
-        cursor: MySQLdb.cursors.Cursor = conn.cursor()
-        cursor.executemany("INSERT INTO `blog_tag` (`blog_id`, `tag_id`) VALUES (%s, %s)", [(row.id, tags_mapping[t]) for t in row.tag_names])
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.executemany("INSERT INTO `blog_tag` (`blog_id`, `tag_id`) VALUES (?, ?)", [(row.id, tags_mapping[t]) for t in row.tag_names])
         cursor.close()
 
         for tag_name in row.tag_names:
@@ -272,8 +270,8 @@ def update_hash():
 
     # since deleting blogs have cascade effect on tags, one should update the rc of tags first
     for id in delta_delete:
-        cursor: MySQLdb.cursors.Cursor = conn.cursor()
-        cursor.execute("SELECT `tag_id`, COUNT(*) FROM `blog_tag` WHERE `blog_id` = %s GROUP BY `tag_id`", (id, ))
+        cursor: sqlite3.Cursor = conn.cursor()
+        cursor.execute("SELECT `tag_id`, COUNT(*) FROM `blog_tag` WHERE `blog_id` = ? GROUP BY `tag_id`", (id, ))
         ans = cursor.fetchall()
         cursor.close()
 
@@ -281,8 +279,8 @@ def update_hash():
             tags[id].rc -= count
         
 
-    cursor: MySQLdb.cursors.Cursor = conn.cursor()
-    cursor.executemany("DELETE FROM `blogs` WHERE `id` = %s", [(i,) for i in delta_delete])
+    cursor: sqlite3.Cursor = conn.cursor()
+    cursor.executemany("DELETE FROM `blogs` WHERE `id` = ?", [(i,) for i in delta_delete])
     cursor.close()
 
 
@@ -290,8 +288,8 @@ def update_hash():
     # cleaning tags if rf <= 0
     unused_tags = [i for i in tags if tags[i].rc == 0]
     
-    cursor: MySQLdb.cursors.Cursor = conn.cursor()
-    cursor.executemany("DELETE FROM `tags` WHERE `id` = %s", [(i,) for i in unused_tags])
+    cursor: sqlite3.Cursor = conn.cursor()
+    cursor.executemany("DELETE FROM `tags` WHERE `id` = ?", [(i,) for i in unused_tags])
     cursor.close()
 
     conn.commit()
