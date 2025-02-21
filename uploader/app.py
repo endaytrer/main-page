@@ -221,7 +221,7 @@ def update_hash():
     cursor.executemany("""
         INSERT INTO `blogs` (`id`, `title`, `license`, `created`, `last_modified`, `password`, `hint`) VALUES
         (?, ?, ?, ?, ?, ?, ?)
-        """, [(row.id, row.title, row.license, int(row.created.timestamp()), int(row.last_modified.timestamp()), row.password, row.hint) for row in delta_insert]
+        """, [(row.id, row.title, row.license, row.created, row.last_modified, row.password, row.hint) for row in delta_insert]
     )
     cursor.close()
     # Also, insert tags and update reference count
