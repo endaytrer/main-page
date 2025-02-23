@@ -3,7 +3,7 @@ import sys
 import os
 import time
 import re
-from flask import Flask, request, send_from_directory
+from flask import Flask, request, send_from_directory, redirect
 import sqlite3
 import datetime
 from typing import Optional
@@ -33,7 +33,7 @@ def acquire_db() -> sqlite3.Connection:
             print("Unable to connect. Retry in 1s...\n", flush=True)
             time.sleep(1)
     return conn
-     
+
 app = Flask(__name__)
 
 @app.route("/")
@@ -48,10 +48,18 @@ def serve_fe(path):
 def serve_blogs(file):
     return send_from_directory("../blogs", file)
 
-@app.route("/sites/<path:path>")
-def serve_sites(path):
-    return send_from_directory("../sites", path)
+@app.route("/sites/<folder>")
+def serve_sites_index_alternative(folder):
+    return redirect(f"/sites/{folder}/", code=302)
+
+@app.route("/sites/<folder>/")
+def serve_sites_index(folder):
+    return send_from_directory(f"../sites/{folder}", "index.html")
     
+@app.route("/sites/<folder>/<path:filename>")
+def serve_sites_files(folder, filename):
+    return send_from_directory(f"../sites/{folder}", filename)
+
 @app.route("/api/blogs/stat/<name>")
 def blog(name):
     conn = acquire_db()
@@ -122,7 +130,7 @@ def list():
     conn = acquire_db()
     page = int(request.args["page"]) if "page" in request.args and request.args["page"].isdigit() else 0
     limit = int(request.args["limit"]) if "limit" in request.args and request.args["limit"].isdigit() else 10
-    order_by = request.args['orderBy'] if "orderBy" in request.args and request.args["orderBy"] in BLOG_PROPERTY_LIST else "created"
+    order_by = request.args['orderBy'] if "orderBy" in request.args and request.args["orderBy"] in BLOG_PROPERTY_LIST else "last_modified"
     descent = "descent" in request.args
 
     command = f"SELECT b.`id`, b.`title`, b.`reads`, b.`likes`, b.`created`, b.`last_modified`, b.`password` IS NOT NULL FROM `blogs` b"
