@@ -44,9 +44,9 @@ def serve_index():
 def serve_fe(path):
     return send_from_directory('../client/www', path)
 
-@app.route("/blogs/<file>")
-def serve_blogs(file):
-    return send_from_directory("../blogs", file)
+@app.route("/blogs/<path:path>")
+def serve_blogs(path):
+    return send_from_directory("../blogs", path)
 
 @app.route("/sites/<folder>")
 def serve_sites_index_alternative(folder):
